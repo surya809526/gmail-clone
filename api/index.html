@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gmail</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Google Sans',Roboto,sans-serif}
+body{background:#f6f8fc;height:100vh;overflow:hidden}
+#login{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:100;padding:32px}
+.g-logo{font-size:48px;font-weight:300}
+.g-logo span:nth-child(1){color:#4285F4}.g-logo span:nth-child(2){color:#EA4335}
+.g-logo span:nth-child(3){color:#FBBC05}.g-logo span:nth-child(4){color:#4285F4}
+.g-logo span:nth-child(5){color:#34A853}
+#gbtn{display:flex;align-items:center;gap:12px;border:1px solid #dadce0;border-radius:6px;padding:12px 24px;background:#fff;font-size:15px;font-weight:500;color:#3c4043;cursor:pointer;width:100%;justify-content:center}
+#login-st{font-size:13px;color:#5f6368;text-align:center;min-height:20px}
+#app{display:none;flex-direction:column;height:100vh}
+#topbar{background:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e0e0e0}
+#menu-btn{background:none;border:none;font-size:20px;cursor:pointer}
+#searchbar{flex:1;background:#eaf1fb;border:none;border-radius:24px;padding:9px 16px;font-size:14px;outline:none}
+.top-av{width:32px;height:32px;border-radius:50%;background:#4285F4;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center}
+#drawer{position:fixed;top:0;left:-260px;width:260px;height:100%;background:#fff;z-index:200;transition:left .25s;box-shadow:2px 0 8px rgba(0,0,0,.12);padding-top:16px}
+#drawer.open{left:0}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:199}
+#overlay.show{display:block}
+.dr-logo{padding:8px 20px 16px;font-size:22px;font-weight:300}
+.dr-logo span:nth-child(1){color:#4285F4}.dr-logo span:nth-child(2){color:#EA4335}
+.dr-logo span:nth-child(3){color:#FBBC05}.dr-logo span:nth-child(4){color:#4285F4}
+.dr-logo span:nth-child(5){color:#34A853}
+.nav-item{display:flex;align-items:center;gap:16px;padding:12px 20px;font-size:14px;color:#202124;cursor:pointer;border-radius:0 24px 24px 0;margin-right:12px}
+.nav-item.active{background:#d3e3fd;font-weight:500}
+.nav-item .ic{font-size:18px;width:24px;text-align:center}
+.nav-item .cnt{margin-left:auto;font-size:13px;color:#1a73e8;font-weight:700}
+#acc-bar{background:#e8f0fe;padding:8px 14px;font-size:13px;display:none;flex-wrap:wrap;gap:6px;align-items:center}
+.acc-chip{background:#fff;border:1px solid #1a73e8;border-radius:16px;padding:4px 12px;font-size:12px;color:#1a73e8;cursor:pointer}
+.acc-chip.active{background:#1a73e8;color:#fff}
+#list-view{display:flex;flex-direction:column;flex:1;overflow:hidden}
+#email-list{flex:1;overflow-y:auto;background:#f6f8fc;padding:8px 0}
+.email-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;margin:2px 8px;border-radius:12px;cursor:pointer}
+.email-row:active{background:#e8f0fe}
+.email-row.unread{font-weight:600}
+.email-row.unread .e-sub{color:#202124}
+.av{width:40px;height:40px;min-width:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff}
+.e-info{flex:1;overflow:hidden}
+.e-top{display:flex;justify-content:space-between;margin-bottom:2px}
+.e-from{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+.e-time{font-size:12px;color:#5f6368;white-space:nowrap}
+.e-sub{font-size:13px;color:#5f6368;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.u-dot{width:8px;height:8px;border-radius:50%;background:#1a73e8;flex-shrink:0}
+#email-detail{display:none;flex-direction:column;flex:1;overflow:hidden}
+#d-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e0e0e0;background:#fff}
+#back-btn{background:none;border:none;font-size:22px;cursor:pointer;color:#444}
+#d-subject{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#d-body{flex:1;overflow-y:auto;padding:16px}
+.d-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f0f0f0}
+.d-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;flex-shrink:0}
+.d-from{font-size:14px;font-weight:500}.d-date{font-size:12px;color:#5f6368}
+.d-text{font-size:15px;line-height:1.8;color:#202124;white-space:pre-wrap}
+#fab{position:fixed;bottom:80px;right:20px;background:#c2e7ff;border:none;border-radius:16px;padding:14px 20px;font-size:14px;font-weight:500;color:#001d35;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:50}
+#csheet{position:fixed;bottom:-100%;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.15);z-index:150;transition:bottom .3s;display:flex;flex-direction:column}
+#csheet.open{bottom:0}
+.c-top{background:#404040;color:#fff;padding:12px 16px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:500}
+.c-top button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer}
+.cfield{padding:10px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;font-size:14px;color:#5f6368}
+.cfield input{flex:1;border:none;outline:none;font-size:14px;color:#202124;background:none}
+#cbody{padding:12px 16px;min-height:150px;font-size:15px;outline:none;border:none;resize:none;font-family:inherit;color:#202124}
+.c-foot{padding:12px 16px;display:flex;align-items:center;gap:12px;border-top:1px solid #f0f0f0}
+#send-btn{background:#0b57d0;color:#fff;border:none;border-radius:24px;padding:10px 24px;font-size:14px;font-weight:500;cursor:pointer}
+#send-btn:disabled{background:#aaa}
+#send-st{font-size:13px}
+#bnav{display:flex;background:#fff;border-top:1px solid #e0e0e0;padding:6px 0}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;cursor:pointer;font-size:11px;color:#5f6368}
+.bn.active{color:#0b57d0}
+.bn .bi{font-size:20px}
+.msg{padding:40px;text-align:center;color:#5f6368;font-size:14px}
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="g-logo"><span>G</span><span>m</span><span>a</span><span>i</span><span>l</span></div>
+  <p style="color:#5f6368;font-size:16px">Sign in to continue</p>
+  <button id="gbtn" onclick="doLogin()">
+    <svg width="20" height="20" viewBox="0 0 48 48">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+    </svg>
+    Sign in with Google
+  </button>
+  <p id="login-st"></p>
+</div>
+<div id="app">
+  <div id="topbar">
+    <button id="menu-btn" onclick="toggleDrawer()">☰</button>
+    <input id="searchbar" placeholder="Search in mail" oninput="filterEmails(this.value)"/>
+    <div class="top-av">U</div>
+  </div>
+  <div id="drawer">
+    <div class="dr-logo"><span>G</span><span>m</span><span>a</span><span>i</span><span>l</span></div>
+    <div class="nav-item active" id="nav-INBOX" onclick="switchFolder('INBOX',this)"><span class="ic">📥</span>Inbox<span class="cnt" id="inbox-cnt"></span></div>
+    <div class="nav-item" id="nav-SENT" onclick="switchFolder('SENT',this)"><span class="ic">📤</span>Sent</div>
+    <div class="nav-item" id="nav-DRAFTS" onclick="switchFolder('DRAFTS',this)"><span class="ic">📝</span>Drafts</div>
+    <div class="nav-item" id="nav-SPAM" onclick="switchFolder('SPAM',this)"><span class="ic">⚠️</span>Spam</div>
+    <div class="nav-item" id="nav-TRASH" onclick="switchFolder('TRASH',this)"><span class="ic">🗑️</span>Trash</div>
+    <div style="margin-top:16px;border-top:1px solid #f0f0f0;padding-top:12px">
+      <div class="nav-item" onclick="doLogout()"><span class="ic">🚪</span>Sign out</div>
+    </div>
+  </div>
+  <div id="overlay" onclick="closeDrawer()"></div>
+  <div id="acc-bar"></div>
+  <div id="list-view">
+    <div id="email-list"></div>
+    <div id="bnav">
+      <div class="bn active" onclick="switchFolder('INBOX',document.getElementById('nav-INBOX'))"><div class="bi">📥</div><span>Inbox</span></div>
+      <div class="bn" onclick="switchFolder('SENT',document.getElementById('nav-SENT'))"><div class="bi">📤</div><span>Sent</span></div>
+      <div class="bn" onclick="openCompose()"><div class="bi">✏️</div><span>Compose</span></div>
+    </div>
+  </div>
+  <div id="email-detail">
+    <div id="d-header">
+      <button id="back-btn" onclick="closeDetail()">←</button>
+      <span id="d-subject"></span>
+    </div>
+    <div id="d-body"></div>
+  </div>
+</div>
+<button id="fab" onclick="openCompose()">✏️ Compose</button>
+<div id="csheet">
+  <div class="c-top"><span>New Message</span><button onclick="closeCompose()">✕</button></div>
+  <div class="cfield"><span>To</span><input id="c-to" type="email" placeholder="Recipients"/></div>
+  <div class="cfield"><span>Sub</span><input id="c-sub" placeholder="Subject"/></div>
+  <textarea id="cbody" placeholder="Compose email..."></textarea>
+  <div class="c-foot">
+    <button id="send-btn" onclick="sendEmail()">Send</button>
+    <span id="send-st"></span>
+  </div>
+</div>
+<script>
+const COLORS=['#4285F4','#EA4335','#34A853','#FBBC05','#9334e6','#00838f'];
+const ac=n=>COLORS[(n||'?').charCodeAt(0)%COLORS.length];
+const ini=n=>(n||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+let folder='INBOX',allEmails=[],accountId=null,accounts=[],sentLocal=[];
+async function doLogin(){
+  const st=document.getElementById('login-st');
+  st.textContent='Connecting...';
+  document.getElementById('gbtn').disabled=true;
+  try{
+    const r=await fetch('/api/accounts');
+    const d=await r.json();
+    accounts=d.items||d.accounts||[];
+    if(!accounts.length)throw new Error('Koi account nahi mila!');
+    accountId=accounts[0].id;
+    if(accounts.length>1){
+      const bar=document.getElementById('acc-bar');
+      bar.style.display='flex';
+      bar.innerHTML='<span style="font-weight:500;color:#1a73e8">Account:</span>'+
+        accounts.map((a,i)=>`<span class="acc-chip ${i===0?'active':''}" onclick="switchAcc('${a.id}',this)">${a.name||a.identifier||'Account '+(i+1)}</span>`).join('');
+    }
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.cssText='display:flex;flex-direction:column;height:100vh';
+    loadEmails();
+  }catch(e){
+    st.textContent='❌ '+e.message;
+    document.getElementById('gbtn').disabled=false;
+  }
+}
+function switchAcc(id,el){
+  accountId=id;
+  document.querySelectorAll('.acc-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');loadEmails();
+}
+function doLogout(){
+  closeDrawer();allEmails=[];sentLocal=[];
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+  document.getElementById('gbtn').disabled=false;
+  document.getElementById('login-st').textContent='';
+}
+async function loadEmails(){
+  const list=document.getElementById('email-list');
+  list.innerHTML='<div class="msg">Loading...</div>';
+  try{
+    const r=await fetch(`/api/emails?account_id=${accountId}&folder=${folder}&limit=30`);
+    const d=await r.json();
+    const items=d.items||d.emails||[];
+    allEmails=[...items.map(e=>({
+      id:e.id,from:e.from_attendee?.display_name||e.from_attendee?.identifier||'Unknown',
+      email:e.from_attendee?.identifier||'',subject:e.subject||'(no subject)',
+      body:e.body||e.snippet||'',
+      time:e.date?new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'',
+      unread:e.read===false,folder
+    })),...sentLocal.filter(s=>s.folder===folder)];
+    renderList();
+  }catch(e){list.innerHTML=`<div class="msg">❌ ${e.message}</div>`;}
+}
+function renderList(filter=''){
+  const list=document.getElementById('email-list');
+  const show=allEmails.filter(e=>!filter||e.from.toLowerCase().includes(filter)||e.subject.toLowerCase().includes(filter));
+  const unread=allEmails.filter(e=>e.unread).length;
+  document.getElementById('inbox-cnt').textContent=unread>0?unread:'';
+  if(!show.length){list.innerHTML='<div class="msg">No messages</div>';return;}
+  list.innerHTML=show.map(e=>`
+    <div class="email-row ${e.unread?'unread':''}" onclick="openEmail('${e.id}')">
+      <div class="av" style="background:${ac(e.from)}">${ini(e.from)}</div>
+      <div class="e-info">
+        <div class="e-top"><span class="e-from">${e.from}</span><span class="e-time">${e.time}</span></div>
+        <div class="e-sub">${e.subject}</div>
+      </div>
+      ${e.unread?'<div class="u-dot"></div>':''}
+    </div>`).join('');
+}
+function openEmail(id){
+  const e=allEmails.find(x=>String(x.id)===String(id));
+  if(!e)return;e.unread=false;
+  document.getElementById('d-subject').textContent=e.subject;
+  document.getElementById('d-body').innerHTML=`
+    <div class="d-meta">
+      <div class="d-av" style="background:${ac(e.from)}">${ini(e.from)}</div>
+      <div><div class="d-from">${e.from}</div><div class="d-date">${e.email} · ${e.time}</div></div>
+    </div>
+    <div class="d-text">${e.body||'(empty)'}</div>`;
+  document.getElementById('list-view').style.display='none';
+  document.getElementById('email-detail').style.cssText='display:flex;flex-direction:column;flex:1;overflow:hidden';
+  document.getElementById('fab').style.display='none';
+}
+function closeDetail(){
+  document.getElementById('email-detail').style.display='none';
+  document.getElementById('list-view').style.display='flex';
+  document.getElementById('fab').style.display='flex';renderList();
+}
+function switchFolder(f,el){
+  folder=f;document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');closeDrawer();loadEmails();
+}
+function filterEmails(v){renderList(v.toLowerCase());}
+function toggleDrawer(){document.getElementById('drawer').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+function openCompose(){document.getElementById('csheet').classList.add('open');document.getElementById('c-to').focus();}
+function closeCompose(){
+  document.getElementById('csheet').classList.remove('open');
+  ['c-to','c-sub'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cbody').value='';document.getElementById('send-st').textContent='';
+}
+async function sendEmail(){
+  const to=document.getElementById('c-to').value.trim();
+  const subject=document.getElementById('c-sub').value.trim();
+  const body=document.getElementById('cbody').value.trim();
+  const st=document.getElementById('send-st');const btn=document.getElementById('send-btn');
+  if(!to||!subject){st.style.color='#d93025';st.textContent='To aur Subject bharo!';return;}
+  btn.disabled=true;st.style.color='#5f6368';st.textContent='Sending...';
+  try{
+    const r=await fetch('/api/emails',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({account_id:accountId,to:[{email:to}],subject,body})});
+    const d=await r.json();
+    if(r.ok){st.style.color='#34A853';st.textContent='✅ Sent!';
+      sentLocal.push({id:'s'+Date.now(),from:'Me',email:'me',subject,body:`To: ${to}\n\n${body}`,time:'Now',unread:false,folder:'SENT'});
+      setTimeout(closeCompose,1200);
+    }else throw new Error(d.message||d.error||'Failed');
+  }catch(e){st.style.color='#d93025';st.textContent='❌ '+e.message;}
+  finally{btn.disabled=false;}
+}
+</script>
+</body>
+  </html>
